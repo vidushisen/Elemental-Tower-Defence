@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elemental Tower Defense - Tactical Spellcraft Arcade</title>
+  <meta name="description" content="A high-performance elemental tower defense game featuring continuous waves, auto ultimate meteor strikes, procedural audio synthesis, and glassmorphic UI.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top Navigation & Dashboard Header -->
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <h1>ELEMENTAL TD</h1>
+    </div>
+
+    <!-- Gameplay Stats Badges -->
+    <div class="stats-bar">
+      <div class="stat-badge gold" title="Gold Available">
+        <span class="stat-icon">🪙</span>
+        <span id="statGold">450</span> G
+      </div>
+      <div class="stat-badge lives" title="Crystal Health / Lives">
+        <span class="stat-icon">❤️</span>
+        <span id="statLives">20</span> HP
+      </div>
+      <div class="stat-badge wave" title="Current Wave">
+        <span class="stat-icon">🌊</span>
+        Wave <span id="statWave">0/10</span>
+      </div>
+    </div>
+
+    <!-- Global Game Controls & Auto Ultimate Gauge -->
+    <div class="controls-bar">
+      <div class="ultimate-wrapper" title="Auto-triggers Meteor Strike when 100% full!">
+        <div id="ultChargeFill" class="ult-charge-fill"></div>
+        <div id="ultText" class="ult-text">🔥 ULTIMATE: <span id="ultPercent">0%</span></div>
+      </div>
+      <button id="btnSpeed" class="btn-ctrl" title="Toggle Game Speed">1x Speed</button>
+      <button id="btnMute" class="btn-ctrl" title="Toggle Audio Synth">🔊 Audio</button>
+    </div>
+  </header>
+
+  <!-- Main Application Wrapper -->
+  <main class="main-wrapper">
+
+    <!-- Interactive Game Canvas Container -->
+    <div class="canvas-container">
+
+      <!-- Top Overlay Bar on Canvas -->
+      <div class="canvas-overlay-bar">
+        <span id="mapName" class="map-name">Verdant Trail</span>
+        <div class="wave-progress-bar" title="Wave Progress">
+          <div id="waveProgressFill" class="wave-progress-fill"></div>
+        </div>
+      </div>
+
+      <!-- 60FPS Game Canvas -->
+      <canvas id="gameCanvas" width="960" height="600"></canvas>
+    </div>
+
+    <!-- Right Sidebar HUD Control Panel -->
+    <aside class="sidebar-hud">
+
+      <!-- Tower Shop Section -->
+      <div class="shop-section">
+        <div class="section-title">
+          <span>Element Shop</span>
+        </div>
+        <div id="towerShopGrid" class="tower-shop-grid">
+          <!-- Dynamic Tower Cards Rendered Here -->
+        </div>
+      </div>
+
+      <!-- Selected Tower Details & Upgrade Panel -->
+      <div id="detailPanel" class="detail-panel" style="display: none;">
+        <div class="detail-header">
+          <div id="detailTitle" class="detail-title">Pyro Cannon (Tier 1)</div>
+        </div>
+
+        <!-- Target Priority Selector -->
+        <div class="priority-selector">
+          <button class="btn-prio active" data-prio="first">First</button>
+          <button class="btn-prio" data-prio="last">Last</button>
+          <button class="btn-prio" data-prio="strongest">Strong</button>
+          <button class="btn-prio" data-prio="weakest">Weak</button>
+        </div>
+
+        <!-- Tower Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-row"><span>Damage:</span> <span id="detailDamage">35</span></div>
+          <div class="stat-row"><span>Range:</span> <span id="detailRange">130</span></div>
+          <div class="stat-row"><span>Rate:</span> <span id="detailRate">0.9s</span></div>
+          <div class="stat-row"><span>Kills:</span> <span id="detailKills">0</span></div>
+        </div>
+
+        <!-- Upgrade / Sell Actions -->
+        <div class="action-buttons">
+          <button id="btnUpgrade" class="btn-action btn-upgrade">UPGRADE (120 G)</button>
+          <button id="btnSell" class="btn-action btn-sell">SELL (70 G)</button>
+        </div>
+      </div>
+
+      <!-- Elemental Reactions Synergies Guide -->
+      <div class="synergies-section">
+        <div class="section-title">Combo Reactions</div>
+        <div class="synergy-list">
+          <div class="synergy-item" style="border-color: #00f3ff;">
+            <strong>Fire + Ice:</strong> Steam Blast (+150% Instant AOE)
+          </div>
+          <div class="synergy-item" style="border-color: #e0a96d;">
+            <strong>Lightning + Ice:</strong> Superconduct (-50% Armor)
+          </div>
+          <div class="synergy-item" style="border-color: #b5179e;">
+            <strong>Fire + Lightning:</strong> Plasma Shockwave (Chain AOE)
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- 1. START GAME MENU OVERLAY SCREEN -->
+  <div id="startScreenOverlay" class="screen-backdrop show">
+    <div class="start-card">
+      <div class="start-brand">
+        <div class="brand-badge">⚡</div>
+        <h1>ELEMENTAL TOWER DEFENSE</h1>
+        <p class="subtitle">CONTINUOUS SPELLCRAFT & AUTO ULTIMATE</p>
+      </div>
+
+      <!-- Instructions & How To Play Cards -->
+      <div class="instructions-grid">
+        <div class="inst-card">
+          <div class="inst-icon">🏰</div>
+          <h3>1. BUILD & UPGRADE</h3>
+          <p>Place temporary 20s towers on green tiles. Waves start automatically!</p>
+        </div>
+        <div class="inst-card">
+          <div class="inst-icon">💥</div>
+          <h3>2. COMBO SYNERGIES</h3>
+          <p>Mix elements on the same creep! <strong>Fire + Ice</strong> = Steam Blast (+150% AOE Dmg).</p>
+        </div>
+        <div class="inst-card">
+          <div class="inst-icon">☄️</div>
+          <h3>3. AUTO ULTIMATE</h3>
+          <p>Ultimate Charge 100% hote hi <strong>METEOR STRIKE</strong> screen par automatic unleash ho jayega!</p>
+        </div>
+      </div>
+
+      <!-- Map Selector Buttons -->
+      <div class="map-selector-group">
+        <span class="map-label">SELECT BATTLEFIELD:</span>
+        <div class="map-buttons">
+          <button class="btn-map active" data-map="0">🌱 Verdant Trail</button>
+          <button class="btn-map" data-map="1">❄️ Frostbyte Ridge</button>
+          <button class="btn-map" data-map="2">🌋 Volcanic Core</button>
+        </div>
+      </div>
+
+      <button id="btnStartGame" class="btn-huge btn-accent">ENTER BATTLEFIELD</button>
+    </div>
+  </div>
+
+  <!-- 2. VICTORY RESULT BOARD -->
+  <div id="victoryOverlay" class="screen-backdrop">
+    <div class="result-card victory-theme">
+      <div class="trophy-badge">🏆</div>
+      <h2 class="result-title victory">VICTORY ACHIEVED!</h2>
+      <div id="victoryStars" class="star-rating">⭐⭐⭐</div>
+
+      <div class="rank-badge" id="victoryRank">RANK S</div>
+
+      <div id="victoryStats" class="result-stats-grid">
+        <!-- Dynamic Stats populated by JS -->
+      </div>
+
+      <div class="modal-actions">
+        <button id="btnNextMap" class="btn-large btn-accent">NEXT BATTLEFIELD</button>
+        <button id="btnReplayVictory" class="btn-large btn-ctrl">REPLAY</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. DEFEAT RESULT BOARD -->
+  <div id="defeatOverlay" class="screen-backdrop">
+    <div class="result-card defeat-theme">
+      <div class="skull-badge">💀</div>
+      <h2 class="result-title defeat">DEFENCE BREACHED</h2>
+      <p class="defeat-subtitle">Your Crystal Core was destroyed by the enemy creep wave.</p>
+
+      <div class="rank-badge defeat-rank" id="defeatRank">RANK D</div>
+
+      <div id="defeatStats" class="result-stats-grid">
+        <!-- Dynamic Stats populated by JS -->
+      </div>
+
+      <div class="pro-tip-box">
+        💡 <strong>PRO TIP:</strong> Combine <strong>Ice Towers</strong> with <strong>Fire Towers</strong> to trigger <em>Steam Blast Explosions</em> against heavy armored creeps!
+      </div>
+
+      <div class="modal-actions">
+        <button id="btnRetryDefeat" class="btn-large btn-danger">RETRY BATTLE</button>
+        <button id="btnMenuDefeat" class="btn-large btn-ctrl">MAIN MENU</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
